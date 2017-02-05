@@ -1,5 +1,6 @@
-package dbfit.api;
+package dbfit.api.vendor;
 
+import dbfit.api.DBEnvironment;
 import dbfit.fixture.StatementExecution;
 import dbfit.util.DbParameterAccessor;
 import dbfit.util.DbParameterAccessors;
@@ -8,17 +9,21 @@ import static dbfit.util.sql.PreparedStatements.buildStoredRoutineCallCmdText;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class DbStoredProcedureCall {
+public class DefaultDbStoredProcedureCall implements DbStoredProcedureCall {
     private final DBEnvironment environment;
     private final String name;
     private final DbParameterAccessors accessors;
 
-    public DbStoredProcedureCall(DBEnvironment environment, String name, DbParameterAccessor[] accessors) {
+    public DefaultDbStoredProcedureCall(DBEnvironment environment, String name, DbParameterAccessor[] accessors) {
         this.environment = environment;
         this.name = name;
         this.accessors = new DbParameterAccessors(accessors);
     }
 
+    /* (non-Javadoc)
+     * @see dbfit.api.IDbStoredProcedureCall#getName()
+     */
+    @Override
     public String getName() {
         return name;
     }
@@ -27,6 +32,10 @@ public class DbStoredProcedureCall {
         return accessors;
     }
 
+    /* (non-Javadoc)
+     * @see dbfit.api.IDbStoredProcedureCall#isFunction()
+     */
+    @Override
     public boolean isFunction() {
         return getAccessors().containsReturnValue();
     }
@@ -35,6 +44,10 @@ public class DbStoredProcedureCall {
         return getAccessors().getNumberOfParameters();
     }
 
+    /* (non-Javadoc)
+     * @see dbfit.api.IDbStoredProcedureCall#toSqlString()
+     */
+    @Override
     public String toSqlString() {
         return buildStoredRoutineCallCmdText(getName(), getNumberOfParameters(), isFunction());
     }
@@ -43,6 +56,10 @@ public class DbStoredProcedureCall {
         getAccessors().bindParameters(cs);
     }
 
+    /* (non-Javadoc)
+     * @see dbfit.api.IDbStoredProcedureCall#toStatementExecution()
+     */
+    @Override
     public StatementExecution toStatementExecution() throws SQLException {
         String sql = toSqlString();
         PreparedStatement ps = environment.getConnection().prepareCall(sql);
