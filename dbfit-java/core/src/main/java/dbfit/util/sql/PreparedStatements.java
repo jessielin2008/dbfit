@@ -8,9 +8,23 @@ public class PreparedStatements {
         return join(repeat("?", numberOfParameters), ", ");
     }
 
-    public static String buildStoredRoutineCallCmdText(
-            String routineName, int numberOfPararameters, boolean paramsIncludeReturnValue) {
-        return "{ " + (paramsIncludeReturnValue ? "? = " : "") + "call " + routineName + "(" +
-            buildParamList((paramsIncludeReturnValue ? numberOfPararameters - 1 : numberOfPararameters)) + ") }";
+    private static String returnValueParam(boolean returnsValue) {
+        return returnsValue ? "? = " : "";
+    }
+
+    private static String storedRoutineExecution(String routineName, int numberOfParameters) {
+        return "call " + routineName + "(" + buildParamList(numberOfParameters) + ")";
+    }
+
+    public static String storedRoutineStatement(
+            String routineName, int numberOfParams, boolean hasReturnValueParam) {
+        int executionParams = numberOfParams - (hasReturnValueParam ? 1 : 0);
+        return returnValueParam(hasReturnValueParam) +
+            storedRoutineExecution(routineName, executionParams);
+    }
+
+    public static String storedRoutineCall(
+            String routineName, int numberOfParams, boolean hasReturnValueParam) {
+        return "{ " + storedRoutineStatement(routineName, numberOfParams, hasReturnValueParam) + " }";
     }
 }

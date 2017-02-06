@@ -4,7 +4,7 @@ import dbfit.api.DBEnvironment;
 import dbfit.fixture.StatementExecution;
 import dbfit.util.DbParameterAccessor;
 import dbfit.util.DbParameterAccessors;
-import static dbfit.util.sql.PreparedStatements.buildStoredRoutineCallCmdText;
+import static dbfit.util.sql.PreparedStatements.storedRoutineCall;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -20,9 +20,6 @@ public class DefaultDbStoredProcedureCall implements DbStoredProcedureCall {
         this.accessors = new DbParameterAccessors(accessors);
     }
 
-    /* (non-Javadoc)
-     * @see dbfit.api.IDbStoredProcedureCall#getName()
-     */
     @Override
     public String getName() {
         return name;
@@ -32,9 +29,6 @@ public class DefaultDbStoredProcedureCall implements DbStoredProcedureCall {
         return accessors;
     }
 
-    /* (non-Javadoc)
-     * @see dbfit.api.IDbStoredProcedureCall#isFunction()
-     */
     @Override
     public boolean isFunction() {
         return getAccessors().containsReturnValue();
@@ -44,21 +38,14 @@ public class DefaultDbStoredProcedureCall implements DbStoredProcedureCall {
         return getAccessors().getNumberOfParameters();
     }
 
-    /* (non-Javadoc)
-     * @see dbfit.api.IDbStoredProcedureCall#toSqlString()
-     */
-    @Override
     public String toSqlString() {
-        return buildStoredRoutineCallCmdText(getName(), getNumberOfParameters(), isFunction());
+        return storedRoutineCall(getName(), getNumberOfParameters(), isFunction());
     }
 
     void bindParametersTo(StatementExecution cs) throws SQLException {
         getAccessors().bindParameters(cs);
     }
 
-    /* (non-Javadoc)
-     * @see dbfit.api.IDbStoredProcedureCall#toStatementExecution()
-     */
     @Override
     public StatementExecution toStatementExecution() throws SQLException {
         String sql = toSqlString();
